@@ -13,29 +13,19 @@ public class MeshGen : MonoBehaviour
     public int VisibleMeshes = 4;
     // indicates whether the floor should come from left or right 
     public bool IsFromLeft = true;
-    // the maximum height the walls should reach
-    public float HighestHeight = 1;
-    // the y value where the walls are the closest together
-    public float BottomDistance = 100f;
     // the prefab including MeshFilter and MeshRenderer
     public MeshFilter SegmentPrefab;
-    // Color 1
-    public Color Color1;
-    // Color 2
-    public Color Color2;
-    // Color 3
-    public Color Color3;
-    // Color 4
-    public Color Color4;
 
     // helper array to generage a new segment without further allocations
-    private Vector3[] _vertexArray;
+    private Vector3[] vertexArray;
     // the pool of free mesh filters
-    private List<MeshFilter> _freeMeshFilters = new List<MeshFilter>();
+    private List<MeshFilter> freeMeshFilters = new List<MeshFilter>();
     // the list of used segments
-    private List<Segment> _usedSegments = new List<Segment>();
+    private List<Segment> usedSegments = new List<Segment>();
     // the edge of the screen from the direction indicated;
-    private float _screenEdgeX;
+    private float screenEdgeX;
+    // Game Manager
+    private GameManager gameManager;
 
     private struct Segment
     {
@@ -47,12 +37,14 @@ public class MeshGen : MonoBehaviour
 
     private void Awake()
     {
+        gameManager = GameManager.Instance;
+
         // create vertex array helper
-        _vertexArray = new Vector3[SegmentResolution * 2];
+        vertexArray = new Vector3[SegmentResolution * 2];
 
         // Build triangles array. For all meshes this array always will look the same, so only generating once
-        int iterations = _vertexArray.Length / 2 - 1;
-        var triangles = new int[(_vertexArray.Length - 2) * 3];
+        int iterations = vertexArray.Length / 2 - 1;
+        var triangles = new int[(vertexArray.Length - 2) * 3];
 
         for (int i = 0; i < iterations; ++i)
         {
@@ -69,27 +61,13 @@ public class MeshGen : MonoBehaviour
         }
 
         // Create colors array. For now make it all white
-        var colors = new Color[_vertexArray.Length];
-        for (int i = 0; i < _vertexArray.Length; ++i)
+        var colors = new Color[vertexArray.Length];
+        for (int i = 0; i < vertexArray.Length; ++i)
         {
-            int colorValue = i % 4;
+            var defaultColors = gameManager.WallColors;
+            int colorIndex = i % defaultColors.Count;
 
-            switch (colorValue)
-            {
-                default:
-                case 0:
-                    colors[i] = Color1;
-                    break;
-                case 1:
-                    colors[i] = Color2;
-                    break;
-                case 2:
-                    colors[i] = Color3;
-                    break;
-                case 3:
-                    colors[i] = Color4;
-                    break;
-            }
+            colors[i] = defaultColors[colorIndex];
         }
 
         // Create game objects (with MeshFilter) instances.
@@ -101,16 +79,16 @@ public class MeshGen : MonoBehaviour
             Mesh mesh = filter.mesh;
             mesh.Clear();
 
-            mesh.vertices = _vertexArray;
+            mesh.vertices = vertexArray;
             mesh.triangles = triangles;
             mesh.colors = colors;
 
             filter.gameObject.SetActive(false);
-            _freeMeshFilters.Add(filter);
+            freeMeshFilters.Add(filter);
         }
 
         // get the edge of the screen value
-        _screenEdgeX = Camera.main.ViewportToWorldPoint(new Vector3(IsFromLeft ? 0 : 1, 0, 0)).x;
+        screenEdgeX = Camera.main.ViewportToWorldPoint(new Vector3(IsFromLeft ? 0 : 1, 0, 0)).x;
     }
 
     private void Update()
@@ -120,9 +98,9 @@ public class MeshGen : MonoBehaviour
         int currentSegment = (int)(worldCenter.y / SegmentLength);
 
         // Test visible segments for visibility and hide those that aren't visible
-        for (int i = 0; i < _usedSegments.Count;)
+        for (int i = 0; i < usedSegments.Count;)
         {
-            int segmentIndex = _usedSegments[i].Index;
+            int segmentIndex = usedSegments[i].Index;
             if (!IsSegmentInSight(segmentIndex))
             {
                 EnsureSegmentNotVisible(segmentIndex);
@@ -160,14 +138,14 @@ public class MeshGen : MonoBehaviour
             float yPos = step * i * (IsFromLeft ? -1 : 1);
 
             // top vertex
-            float xPosTop = _screenEdgeX + GetHeight(startPosition + yPos);
-            _vertexArray[i * 2] = new Vector3(xPosTop, yPos, 0);
+            float xPosTop = screenEdgeX + GetHeight(startPosition + yPos);
+            vertexArray[i * 2] = new Vector3(xPosTop, yPos, 0);
 
             // bottom vertex always at y = 0
-            _vertexArray[i * 2 + 1] = new Vector3(_screenEdgeX, yPos, 0);
+            vertexArray[i * 2 + 1] = new Vector3(screenEdgeX, yPos, 0);
         }
 
-        mesh.vertices = _vertexArray;
+        mesh.vertices = vertexArray;
 
         // need to recalculate bounds because mesh can disappear too early
         mesh.RecalculateBounds();
@@ -181,7 +159,7 @@ public class MeshGen : MonoBehaviour
         float height = (Mathf.Sin(relativePosition ) + 1.5f + Mathf.Sin(relativePosition * 1.75f) + 1f) / 4f;
 
         // Increment the height as you move down, maxing out at a certain height
-        height += HighestHeight * Mathf.Clamp(position / BottomDistance, 0, 1);
+        height += gameManager.MaxWallWidth * Mathf.Clamp(position / gameManager.DepthForMaxWallWidth, 0, 1);
 
         if (!IsFromLeft)
         {
@@ -214,9 +192,9 @@ public class MeshGen : MonoBehaviour
     // returns list index of currently visible segment
     private int SegmentCurrentlyVisibleListIndex(int index)
     {
-        for (int i = 0; i < _usedSegments.Count; ++i)
+        for (int i = 0; i < usedSegments.Count; ++i)
         {
-            if (_usedSegments[i].Index == index)
+            if (usedSegments[i].Index == index)
             {
                 return i;
             }
@@ -231,9 +209,9 @@ public class MeshGen : MonoBehaviour
         if (!IsSegmentVisible(index))
         {
             // get from the pool
-            int meshIndex = _freeMeshFilters.Count - 1;
-            MeshFilter filter = _freeMeshFilters[meshIndex];
-            _freeMeshFilters.RemoveAt(meshIndex);
+            int meshIndex = freeMeshFilters.Count - 1;
+            MeshFilter filter = freeMeshFilters[meshIndex];
+            freeMeshFilters.RemoveAt(meshIndex);
 
             // generate
             Mesh mesh = filter.mesh;
@@ -250,7 +228,7 @@ public class MeshGen : MonoBehaviour
             segment.Index = index;
             segment.MeshFilter = filter;
 
-            _usedSegments.Add(segment);
+            usedSegments.Add(segment);
         }
     }
 
@@ -260,13 +238,13 @@ public class MeshGen : MonoBehaviour
         if (IsSegmentVisible(index))
         {
             int listIndex = SegmentCurrentlyVisibleListIndex(index);
-            Segment segment = _usedSegments[listIndex];
-            _usedSegments.RemoveAt(listIndex);
+            Segment segment = usedSegments[listIndex];
+            usedSegments.RemoveAt(listIndex);
 
             MeshFilter filter = segment.MeshFilter;
             filter.gameObject.SetActive(false);
 
-            _freeMeshFilters.Add(filter);
+            freeMeshFilters.Add(filter);
         }
     }
 }

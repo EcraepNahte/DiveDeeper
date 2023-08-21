@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    public List<Color> WallColors;
+    public float MaxWallWidth;
+    public float DepthForMaxWallWidth;
     private int Score { get; set; }
     private int HighScore { get; set; }
     private int GoldForRun { get; set; }
