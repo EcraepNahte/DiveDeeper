@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - DamageObject
   layers:
   - Default
   - TransparentFX
@@ -14,8 +15,8 @@ TagManager:
   - Player
   - PlayerPusher
   - Obstacles
-  - 
-  - 
+  - Decoration
+  - DamageObject
   - 
   - 
   - 
@@ -40,4 +41,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 3961533813
+    locked: 0
+  - name: Player
+    uniqueID: 2171485157
+    locked: 0
+  - name: Foreground
+    uniqueID: 2130908757
     locked: 0
