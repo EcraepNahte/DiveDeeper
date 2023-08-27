@@ -20,6 +20,8 @@ public class ObjectSpawner : MonoBehaviour
         screenEdgeRight = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
     }
 
+    // Public Methods
+
     public void SpawnObject()
     {
         List<GameObject> spawnPool = gameManager.GetSpawnPool();
@@ -57,7 +59,7 @@ public class ObjectSpawner : MonoBehaviour
         SpawnableObject objectToSpawn = spawnObjPool[actualIndex];
 
         float spawnZoneLeft = screenEdgeLeft + LeftWall.GetHeight(transform.position.y); 
-        float spawnZoneRight = screenEdgeRight - RightWall.GetHeight(transform.position.y);
+        float spawnZoneRight = screenEdgeRight + RightWall.GetHeight(transform.position.y);
 
         float spawnPositionX = spawnObjPool[actualIndex].GetObjectSpawnPoint(spawnZoneLeft, spawnZoneRight);
 

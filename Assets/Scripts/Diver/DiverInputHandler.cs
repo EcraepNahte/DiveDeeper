@@ -14,6 +14,6 @@ public class DiverInputHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        diverController.SetInputs(Input.GetButtonDown("Kick"), Input.GetAxis("Horizontal"));
+        diverController.SetInputs(Input.GetButtonDown("Kick"), Input.GetAxis("Horizontal"), Input.GetButtonDown("Pause"));
     }
 }

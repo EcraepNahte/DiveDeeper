@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 2130908757
   m_SortingLayer: 3
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1762854388791719718, guid: 30edf0c892cca5240982449f61b0795a, type: 3}
+  m_Sprite: {fileID: 5038269175885218742, guid: 59dae15e264ab6a4cabdbcccafb670d5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -182,7 +182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faf4a5bcb2a1f524db1b0604d225e083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AirAdded: 25
+  AirAdded: 10
   BubbleSpeed: 1
   BubbleCreatedSound: {fileID: 0}
   BubblePopSound: {fileID: 8300000, guid: 65ce807c39c18794bbe29f569fedf7a5, type: 3}

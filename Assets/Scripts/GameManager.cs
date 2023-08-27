@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
-    public bool InvertRotation = false;
+    public bool IsRotationInverted = false;
 
     public List<Color> WallColors;
     public float MaxWallWidth;
@@ -22,6 +22,40 @@ public class GameManager : Singleton<GameManager>
     private int GoldForRun { get; set; }
     private int GoldInWallet { get; set; }
 
+    private void Awake()
+    {
+        HighScore = PlayerPrefs.GetInt("HighScore");
+        IsRotationInverted = PlayerPrefs.GetInt("IsRotationInverted") == 1;
+    }
+
+    // Public Methods
+
+    public void PlayGame()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("SampleScene");
+    }
+
+    public void PauseGame()
+    {
+        UiManager.ShowPauseMenu();
+        Time.timeScale = 0;
+    }
+
+    public void ResumeGame()
+    {
+        UiManager.HidePauseMenu();
+        UiManager.HideGameOverMenu();
+        Time.timeScale = 1;
+    }
+
+    public void RestartGame()
+    {
+        ResumeGame();
+        DontDestroyOnLoad(MusicManager);
+        SceneManager.LoadScene("SampleScene");
+    }
+
     public List<GameObject> GetSpawnPool()
     {
         //TODO if there are harder sections, return that spawn pool
@@ -31,7 +65,10 @@ public class GameManager : Singleton<GameManager>
     public void SetScore(int score)
     {
         Score = score;
-        UiManager.SetScoreText(Score);
+        if (UiManager != null)
+        {
+            UiManager.SetScoreText(Score);
+        }
         ObjectSpawner.SpawnObject();
     }
 
@@ -41,10 +78,26 @@ public class GameManager : Singleton<GameManager>
         {
             Debug.Log("New High Score");
             HighScore = Score;
+
+            PlayerPrefs.SetInt("HighScore", HighScore);
+            PlayerPrefs.Save();
         }
 
-        DontDestroyOnLoad(MusicManager);
-        SceneManager.LoadScene(0);
-        UiManager.SetHighScoreText(HighScore);
+        Time.timeScale = 0;
+        UiManager.ShowGameOverMenu();
+    }
+
+    public void NavigateToMainMenu()
+    {
+        ResumeGame();
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void InvertRotation()
+    {
+        IsRotationInverted = !IsRotationInverted;
+
+        PlayerPrefs.SetInt("IsRotationInverted", IsRotationInverted ? 1 : 0);
+        PlayerPrefs.Save();
     }
 }
