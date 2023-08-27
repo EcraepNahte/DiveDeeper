@@ -13,7 +13,6 @@ public class RockUrchinSpawner : MonoBehaviour
         {
             if (((int)Random.Range(0, 5)) == 1)
             {
-                Debug.Log("Hit");
                 Instantiate(Urchin, transform.position + spawnPoint, Quaternion.identity);
             }
         }

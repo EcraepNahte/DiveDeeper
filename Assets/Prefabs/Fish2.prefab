@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6b20aab798fcb844a65c5765bde546d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnWeight: 1
+  SpawnWeight: 5
   SpawnRoom: 0
 --- !u!1 &2078912183540857958
 GameObject:

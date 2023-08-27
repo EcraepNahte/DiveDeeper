@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
+    public bool InvertRotation = false;
+
     public List<Color> WallColors;
     public float MaxWallWidth;
     public float DepthForMaxWallWidth;
@@ -13,9 +15,10 @@ public class GameManager : Singleton<GameManager>
     public ObjectSpawner ObjectSpawner;
 
     public UIManager UiManager;
+    public GameObject MusicManager;
 
-    private int Score { get; set; }
-    private int HighScore { get; set; }
+    private int Score;
+    public static int HighScore;
     private int GoldForRun { get; set; }
     private int GoldInWallet { get; set; }
 
@@ -28,12 +31,20 @@ public class GameManager : Singleton<GameManager>
     public void SetScore(int score)
     {
         Score = score;
-        UiManager.UpdateScoreText(Score);
+        UiManager.SetScoreText(Score);
         ObjectSpawner.SpawnObject();
     }
 
     public void GameOver()
     {
+        if (Score < HighScore)
+        {
+            Debug.Log("New High Score");
+            HighScore = Score;
+        }
+
+        DontDestroyOnLoad(MusicManager);
         SceneManager.LoadScene(0);
+        UiManager.SetHighScoreText(HighScore);
     }
 }

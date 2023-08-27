@@ -166,5 +166,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34b74d16d63f93b4188a4045f18908e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnWeight: 1
+  SpawnWeight: 5
   SpawnRoom: 0
