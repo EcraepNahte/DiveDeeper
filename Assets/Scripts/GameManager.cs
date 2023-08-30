@@ -7,6 +7,9 @@ public class GameManager : Singleton<GameManager>
 {
     public bool IsRotationInverted = false;
 
+    public bool IsGamePaused;
+    public bool IsGameOver;
+
     public List<Color> WallColors;
     public float MaxWallWidth;
     public float DepthForMaxWallWidth;
@@ -19,8 +22,6 @@ public class GameManager : Singleton<GameManager>
 
     private int Score;
     public static int HighScore;
-    private int GoldForRun { get; set; }
-    private int GoldInWallet { get; set; }
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class GameManager : Singleton<GameManager>
     public void PauseGame()
     {
         UiManager.ShowPauseMenu();
+        IsGamePaused = true;
         Time.timeScale = 0;
     }
 
@@ -46,11 +48,13 @@ public class GameManager : Singleton<GameManager>
     {
         UiManager.HidePauseMenu();
         UiManager.HideGameOverMenu();
+        IsGamePaused = false;
         Time.timeScale = 1;
     }
 
     public void RestartGame()
     {
+        IsGameOver = false;
         ResumeGame();
         DontDestroyOnLoad(MusicManager);
         SceneManager.LoadScene("SampleScene");
@@ -83,6 +87,7 @@ public class GameManager : Singleton<GameManager>
             PlayerPrefs.Save();
         }
 
+        IsGameOver = true;
         Time.timeScale = 0;
         UiManager.ShowGameOverMenu();
     }
